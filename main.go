@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/AkashKarnatak/hst_server/controllers"
@@ -14,12 +15,14 @@ import (
 )
 
 func main() {
+  addr := os.Getenv("ADDR")
+  dbUri := os.Getenv("DB_URI")
   // using julienschmidt router
   mux := httprouter.New()
   // connect to mongodb
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+  client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbUri))
   if err != nil {
     log.Fatalf("Unable to connect to mongodb\n%v\n", err)
     return
@@ -36,6 +39,6 @@ func main() {
   mux.GET("/mentor", mc.GetMentors)
   mux.GET("/startup", sc.GetStartups)
 
-  fmt.Println("Listening on port 8080")
-  http.ListenAndServe("localhost:8080", mux)
+  fmt.Printf("Listening on %v\n", addr)
+  http.ListenAndServe(addr, mux)
 }
