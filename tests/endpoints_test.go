@@ -50,3 +50,23 @@ func TestGetStartups(t *testing.T) {
     t.Errorf("Wrong status. Required %v, got %v", http.StatusOK, rr.Code)
   }
 }
+
+func TestGetEvents(t *testing.T) {
+  // connect to database
+  client := db.ConnectDB()
+  defer db.DisconnectDB(client)
+  eventColl := client.Database("hst").Collection("events")
+  mc := controllers.NewEventController(eventColl)
+  // setup router
+  router := httprouter.New()
+  router.GET("/event", mc.GetEvents)
+  req, err := http.NewRequest("GET", "/event", nil)
+  if err != nil {
+    log.Fatalln(err)
+  }
+  rr := httptest.NewRecorder()
+  router.ServeHTTP(rr, req)
+  if status := rr.Code; status != http.StatusOK {
+    t.Errorf("Wrong status. Required %v, got %v", http.StatusOK, rr.Code)
+  }
+}
