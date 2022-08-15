@@ -8,5 +8,6 @@ type Event struct {
   Time string `json:"time" bson:"Time"`
   Day int `json:"day" bson:"Day"`
   Date string `json:"date" bson:"Date"`
+  Venue string `json:"venue" bson:"Venue"`
   Description string `json:"description" bson:"Description"`
 }
