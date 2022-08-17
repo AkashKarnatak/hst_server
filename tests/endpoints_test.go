@@ -15,11 +15,12 @@ func TestGetMentors(t *testing.T) {
   // connect to database
   client := db.ConnectDB()
   defer db.DisconnectDB(client)
+  startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  mc := controllers.NewMentorController(mentorColl)
+  uc := controllers.NewUserController(startupColl, mentorColl)
   // setup router
   router := httprouter.New()
-  router.GET("/mentor", mc.GetMentors)
+  router.GET("/mentor", uc.GetMentors)
   req, err := http.NewRequest("GET", "/mentor", nil)
   if err != nil {
     log.Fatalln(err)
@@ -36,10 +37,11 @@ func TestGetStartups(t *testing.T) {
   client := db.ConnectDB()
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
-  sc := controllers.NewStartupController(startupColl)
+  mentorColl := client.Database("hst").Collection("mentors")
+  uc := controllers.NewUserController(startupColl, mentorColl)
   // setup router
   router := httprouter.New()
-  router.GET("/startup", sc.GetStartups)
+  router.GET("/startup", uc.GetStartups)
   req, err := http.NewRequest("GET", "/startup", nil)
   if err != nil {
     log.Fatalln(err)
