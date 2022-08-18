@@ -7,6 +7,7 @@ import (
 
 	"github.com/AkashKarnatak/hst_server/controllers"
 	"github.com/AkashKarnatak/hst_server/db"
+	"github.com/AkashKarnatak/hst_server/middlewares"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -25,6 +26,9 @@ func main() {
   router.GET("/mentor", uc.GetMentors)
   router.GET("/startup", uc.GetStartups)
   router.GET("/event", ec.GetEvents)
+  router.POST("/login", uc.Login)
+  router.POST("/logout", middlewares.Authorize(uc.Logout))
+  router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll))
 
   fmt.Printf("Listening on %v\n", addr)
   http.ListenAndServe(addr, router)

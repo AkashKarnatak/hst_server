@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/AkashKarnatak/hst_server/middlewares"
 	"github.com/AkashKarnatak/hst_server/models"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
@@ -24,10 +25,10 @@ func NewUserController(startupColl *mongo.Collection,
   return &UserController{startupColl, mentorColl}
 }
 
-func (mc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  cursor, err := mc.mentorColl.Find(ctx, bson.M{})
+  cursor, err := uc.mentorColl.Find(ctx, bson.M{})
   if err != nil {
     log.Fatalf("Error in retrieving data\n%v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -54,11 +55,11 @@ func (mc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ h
   fmt.Fprintf(w, "%s\n", resJson)
 }
 
-func (mc *UserController) GetStartups(w http.ResponseWriter,
+func (uc *UserController) GetStartups(w http.ResponseWriter,
   r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  cursor, err := mc.startupColl.Find(ctx, bson.M{})
+  cursor, err := uc.startupColl.Find(ctx, bson.M{})
   if err != nil {
     log.Fatalf("Error in retrieving data\n%v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -83,4 +84,139 @@ func (mc *UserController) GetStartups(w http.ResponseWriter,
   w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(http.StatusOK)
   fmt.Fprintf(w, "%s\n", resJson)
+}
+
+func (uc *UserController) Login(w http.ResponseWriter,
+  r *http.Request, _ httprouter.Params) {
+  // get user with email and phNo in db
+  ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+  defer cancel()
+  var user models.User
+  coll := uc.startupColl
+  err := coll.FindOne(
+    ctx,
+    bson.M{"Email": r.FormValue("email"), "Phone": r.FormValue("phNo")},
+  ).Decode(&user)
+  if err != nil {
+    user = models.User{}
+    coll := uc.mentorColl
+    err := coll.FindOne(
+      ctx,
+      bson.M{"Email": r.FormValue("email"), "Phone": r.FormValue("phNo")},
+    ).Decode(&user)
+    if err != nil {
+      log.Fatalf("Unable to find user\n%v\n", err)
+      w.WriteHeader(http.StatusNotFound)
+      fmt.Fprintln(w, "User not found")
+      return
+    }
+  }
+  // now that we have a user, create jwt token for them
+  tokenString, err := middlewares.GenerateNewToken(user.Id) 
+  if err != nil {
+    log.Fatalf("Unable to create new token\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  user.Tokens = append(user.Tokens, tokenString)
+  // update user entry in db
+  _, err = coll.UpdateByID(ctx, user.Id, bson.M{
+    "$set": user,
+  })
+  if err != nil {
+    log.Fatalf("Unable to udpate user\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  // return this token as json
+  js, err := json.Marshal(map[string]string{"token": tokenString})
+  if err != nil {
+    log.Fatalf("Unable to marshal token to json\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, "%s\n", js)
+}
+
+func (uc *UserController) Logout(w http.ResponseWriter,
+  r *http.Request, p httprouter.Params) {
+  // identify whether user is mentor or startup
+  var coll *mongo.Collection
+  if p.ByName("id")[:3] == "STA" {
+    coll = uc.startupColl
+  } else {
+    coll = uc.mentorColl
+  }
+  // fetch the user from their collection
+  ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+  defer cancel()
+  var user models.User
+  err := coll.FindOne(ctx, bson.M{"_id": p.ByName("id")}).Decode(&user)
+  if err != nil {
+    log.Fatalf("Error fetching user from db\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  // delete user's current token
+  var ts []string
+  authToken := r.Header.Get("Authorization") 
+  for _, t := range user.Tokens {
+    if t != authToken {
+      ts = append(ts, t)
+    }
+  }
+  user.Tokens = ts
+  // update user entry in db
+  _, err = coll.UpdateByID(ctx, user.Id, bson.M{
+    "$set": user,
+  })
+  if err != nil {
+    log.Fatalf("Unable to udpate user\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintln(w, "Logged out successfully")
+}
+
+func (uc *UserController) LogoutAll(w http.ResponseWriter,
+  r *http.Request, p httprouter.Params) {
+  // identify whether user is mentor or startup
+  var coll *mongo.Collection
+  if p.ByName("id")[:3] == "STA" {
+    coll = uc.startupColl
+  } else {
+    coll = uc.mentorColl
+  }
+  // fetch the user from their collection
+  ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+  defer cancel()
+  var user models.User
+  err := coll.FindOne(ctx, bson.M{"_id": p.ByName("id")}).Decode(&user)
+  if err != nil {
+    log.Fatalf("Error fetching user from db\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  // delete all user tokens
+  user.Tokens = []string{}
+  // update user entry in db
+  _, err = coll.UpdateByID(ctx, user.Id, bson.M{
+    "$set": user,
+  })
+  if err != nil {
+    log.Fatalf("Unable to udpate user\n%v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintln(w, "Logged out successfully from all devices")
 }
