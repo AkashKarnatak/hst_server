@@ -27,7 +27,7 @@ func (mc *EventController) GetEvents(w http.ResponseWriter, r *http.Request, _ h
   defer cancel()
   cursor, err := mc.coll.Find(ctx, bson.M{})
   if err != nil {
-    log.Fatalf("Error in retrieving data\n%v\n", err)
+    log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -35,14 +35,14 @@ func (mc *EventController) GetEvents(w http.ResponseWriter, r *http.Request, _ h
   var res []models.Event
   err = cursor.All(ctx, &res)
   if err != nil {
-    log.Fatalf("Unable to parse collection data\n%v\n", err)
+    log.Printf("Unable to parse collection data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
   }
   resJson, err := json.Marshal(res)
   if err != nil {
-    log.Fatalf("Unable to marshal data to json\n%v\n", err)
+    log.Printf("Unable to marshal data to json: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return

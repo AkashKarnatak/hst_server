@@ -30,7 +30,7 @@ func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ h
   defer cancel()
   cursor, err := uc.mentorColl.Find(ctx, bson.M{})
   if err != nil {
-    log.Fatalf("Error in retrieving data\n%v\n", err)
+    log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -38,14 +38,14 @@ func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ h
   var res []models.Mentor
   err = cursor.All(ctx, &res)
   if err != nil {
-    log.Fatalf("Unable to parse collection data\n%v\n", err)
+    log.Printf("Unable to parse collection data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
   }
   resJson, err := json.Marshal(res)
   if err != nil {
-    log.Fatalf("Unable to marshal data to json\n%v\n", err)
+    log.Printf("Unable to marshal data to json: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -61,7 +61,7 @@ func (uc *UserController) GetStartups(w http.ResponseWriter,
   defer cancel()
   cursor, err := uc.startupColl.Find(ctx, bson.M{})
   if err != nil {
-    log.Fatalf("Error in retrieving data\n%v\n", err)
+    log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -69,14 +69,14 @@ func (uc *UserController) GetStartups(w http.ResponseWriter,
   var res []models.Startup
   err = cursor.All(ctx, &res)
   if err != nil {
-    log.Fatalf("Unable to parse collection data\n%v\n", err)
+    log.Printf("Unable to parse collection data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
   }
   resJson, err := json.Marshal(res)
   if err != nil {
-    log.Fatalf("Unable to marshal data to json\n%v\n", err)
+    log.Printf("Unable to marshal data to json: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -105,7 +105,7 @@ func (uc *UserController) Login(w http.ResponseWriter,
       bson.M{"Email": r.FormValue("email"), "Phone": r.FormValue("phNo")},
     ).Decode(&user)
     if err != nil {
-      log.Fatalf("Unable to find user\n%v\n", err)
+      log.Printf("Unable to find user: %v\n", err)
       w.WriteHeader(http.StatusNotFound)
       fmt.Fprintln(w, "User not found")
       return
@@ -114,7 +114,7 @@ func (uc *UserController) Login(w http.ResponseWriter,
   // now that we have a user, create jwt token for them
   tokenString, err := middlewares.GenerateNewToken(user.Id) 
   if err != nil {
-    log.Fatalf("Unable to create new token\n%v\n", err)
+    log.Printf("Unable to create new token: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -125,7 +125,7 @@ func (uc *UserController) Login(w http.ResponseWriter,
     "$set": user,
   })
   if err != nil {
-    log.Fatalf("Unable to udpate user\n%v\n", err)
+    log.Printf("Unable to udpate user: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -133,7 +133,7 @@ func (uc *UserController) Login(w http.ResponseWriter,
   // return this token as json
   js, err := json.Marshal(map[string]string{"token": tokenString})
   if err != nil {
-    log.Fatalf("Unable to marshal token to json\n%v\n", err)
+    log.Printf("Unable to marshal token to json: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -157,7 +157,7 @@ func (uc *UserController) Logout(w http.ResponseWriter,
   var user models.User
   err := coll.FindOne(ctx, bson.M{"_id": p.ByName("id")}).Decode(&user)
   if err != nil {
-    log.Fatalf("Error fetching user from db\n%v\n", err)
+    log.Printf("Error fetching user from db: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -176,7 +176,7 @@ func (uc *UserController) Logout(w http.ResponseWriter,
     "$set": user,
   })
   if err != nil {
-    log.Fatalf("Unable to udpate user\n%v\n", err)
+    log.Printf("Unable to udpate user: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -200,7 +200,7 @@ func (uc *UserController) LogoutAll(w http.ResponseWriter,
   var user models.User
   err := coll.FindOne(ctx, bson.M{"_id": p.ByName("id")}).Decode(&user)
   if err != nil {
-    log.Fatalf("Error fetching user from db\n%v\n", err)
+    log.Printf("Error fetching user from db: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return
@@ -212,7 +212,7 @@ func (uc *UserController) LogoutAll(w http.ResponseWriter,
     "$set": user,
   })
   if err != nil {
-    log.Fatalf("Unable to udpate user\n%v\n", err)
+    log.Printf("Unable to udpate user: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
     fmt.Fprintln(w, "Internal server error")
     return

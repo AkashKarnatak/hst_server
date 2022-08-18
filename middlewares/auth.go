@@ -49,7 +49,7 @@ func Authorize(h httprouter.Handle) httprouter.Handle {
 		tokenString := r.Header.Get("Authorization")
     uc, err := ParseTokenStr(tokenString)
     if err != nil {
-      log.Fatalln(err)
+      log.Printf("%v\n", err)
       w.WriteHeader(http.StatusUnauthorized)
       fmt.Fprintln(w, "Unauthorized")
       return
