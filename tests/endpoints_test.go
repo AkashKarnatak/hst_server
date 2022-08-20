@@ -91,8 +91,8 @@ func TestLogin(t *testing.T) {
   // create new request
   req, err := http.NewRequest("POST", "/login", nil)
   form := url.Values{
-    "email": {"agriwastebio@gmail.com"},
-    "phNo": {"9284406552"},
+    "email": {"siddharth@thesolarlabs.com"},
+    "phNo": {"8628868995"},
   }
   req.PostForm = form
   if err != nil {
