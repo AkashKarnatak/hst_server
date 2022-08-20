@@ -19,8 +19,10 @@ func main() {
   mentorColl := client.Database("hst").Collection("mentors")
   startupColl := client.Database("hst").Collection("startups")
   eventColl := client.Database("hst").Collection("events")
+  mappingColl := client.Database("hst").Collection("mappings")
   uc := controllers.NewUserController(startupColl, mentorColl)
   ec := controllers.NewEventController(eventColl)
+  mc := controllers.NewMeetingController(mappingColl)
   // setup router
   router := httprouter.New()
   router.GET("/mentor", uc.GetMentors)
@@ -29,6 +31,7 @@ func main() {
   router.POST("/login", uc.Login)
   router.POST("/logout", middlewares.Authorize(uc.Logout))
   router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll))
+  router.POST("/meeting", middlewares.Authorize(mc.GetMeetings))
 
   fmt.Printf("Listening on %v\n", addr)
   http.ListenAndServe(addr, router)

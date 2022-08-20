@@ -1,13 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Meeting struct {
-  Id primitive.ObjectID `json:"id" bson:"_id"`
-  Name string `json:"name" bson:"Name"`
+  MentorName string `json:"mentorName" bson:"mentorName"`
+  MentorDescription string `json:"mentorDescription" bson:"mentorDescription"`
+  StartupName string `json:"startupName" bson:"startupName"`
+  StartupDescription string `json:"startupDescription" bson:"startupDescription"`
   Time string `json:"time" bson:"Time"`
   Day int `json:"day" bson:"Day"`
-  Date string `json:"date" bson:"Date"`
-  Venue string `json:"venue" bson:"Venue"`
-  Description string `json:"description" bson:"Description"`
 }
