@@ -20,6 +20,7 @@ type Mentor struct {
   Description string `json:"description" bson:"Description"`
   LinkedinProfile string `json:"linkedinProfile" bson:"LinkedIn"`
   Organization string `json:"organization" bson:"Organization"`
+  Photo string `json:"photo" bson:"Photo"`
 }
 
 type Startup struct {
