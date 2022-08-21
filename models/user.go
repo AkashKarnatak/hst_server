@@ -1,10 +1,10 @@
 package models
 
 type User struct {
-  Id string `json:"id" bson:"_id"`
-  EmailId string `json:"emailId" bson:"Email"`
-  PhNo string `json:"phNo" bson:"Phone"`
-  Tokens []string `json:"tokens" bson:"tokens"`
+  Id string `json:"id,omitempty" bson:"_id"`
+  EmailId string `json:"emailId,omitempty" bson:"Email"`
+  PhNo string `json:"phNo,omitempty" bson:"Phone"`
+  Tokens []string `json:"tokens,omitempty" bson:"tokens"`
 }
 
 type Mentor struct {

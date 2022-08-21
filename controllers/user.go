@@ -13,6 +13,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserController struct {
@@ -59,7 +60,13 @@ func (uc *UserController) GetStartups(w http.ResponseWriter,
   r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  cursor, err := uc.startupColl.Find(ctx, bson.M{})
+  opts := options.Find().SetProjection(bson.M{
+    "_id": 0,
+    "Email": 0,
+    "Phone": 0,
+    "tokens": 0,
+  })
+  cursor, err := uc.startupColl.Find(ctx, bson.M{}, opts)
   if err != nil {
     log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)

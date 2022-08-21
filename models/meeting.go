@@ -7,4 +7,5 @@ type Meeting struct {
   StartupDescription string `json:"startupDescription" bson:"startupDescription"`
   Time string `json:"time" bson:"Time"`
   Day int `json:"day" bson:"Day"`
+  Venue string `json:"venue" bson:"Venue"`
 }
