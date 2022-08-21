@@ -20,7 +20,8 @@ func main() {
   startupColl := client.Database("hst").Collection("startups")
   eventColl := client.Database("hst").Collection("events")
   mappingColl := client.Database("hst").Collection("mappings")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   ec := controllers.NewEventController(eventColl)
   mc := controllers.NewMeetingController(mappingColl)
   // setup router
@@ -34,6 +35,7 @@ func main() {
   router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll, startupColl, mentorColl))
   router.POST("/check", middlewares.Authorize(uc.Check, startupColl, mentorColl))
   router.POST("/meeting", middlewares.Authorize(mc.GetMeetings, startupColl, mentorColl))
+  router.POST("/guest", uc.CreateGuest)
 
   fmt.Printf("Listening on %v\n", addr)
   http.ListenAndServe(addr, router)

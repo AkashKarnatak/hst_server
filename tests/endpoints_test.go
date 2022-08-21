@@ -22,7 +22,8 @@ func TestGetMentors(t *testing.T) {
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
   router.GET("/mentor", uc.GetMentors)
@@ -43,7 +44,8 @@ func TestGetStartups(t *testing.T) {
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
   router.GET("/startup", uc.GetStartups)
@@ -84,7 +86,8 @@ func TestLogin(t *testing.T) {
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
   router.POST("/login", uc.Login)
@@ -141,7 +144,8 @@ func TestLogout(t *testing.T) {
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
   router.POST("/logout", middlewares.Authorize(uc.Logout, startupColl, mentorColl))
@@ -166,7 +170,8 @@ func TestLogoutAll(t *testing.T) {
   defer db.DisconnectDB(client)
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  uc := controllers.NewUserController(startupColl, mentorColl)
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
   router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll, startupColl, mentorColl))

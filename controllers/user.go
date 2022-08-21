@@ -12,6 +12,7 @@ import (
 	"github.com/AkashKarnatak/hst_server/models"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,11 +20,13 @@ import (
 type UserController struct {
   startupColl *mongo.Collection
   mentorColl *mongo.Collection
+  guestColl *mongo.Collection
 }
 
 func NewUserController(startupColl *mongo.Collection,
-  mentorColl *mongo.Collection) *UserController {
-  return &UserController{startupColl, mentorColl}
+  mentorColl *mongo.Collection,
+  guestColl *mongo.Collection) *UserController {
+  return &UserController{startupColl, mentorColl, guestColl}
 }
 
 func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -238,4 +241,22 @@ func (uc *UserController) LogoutAll(w http.ResponseWriter,
   }
   w.WriteHeader(http.StatusOK)
   fmt.Fprintln(w, "Logged out successfully from all devices")
+}
+
+func (uc *UserController) CreateGuest(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+  ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+  defer cancel()
+  guest := models.Guest{
+    Id: primitive.NewObjectID(),
+    EmailId: r.FormValue("email"),
+  }
+  _, err := uc.guestColl.InsertOne(ctx, guest)
+  if err != nil {
+    log.Printf("Error inserting guest in db: %v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintln(w, "Guest created successfully")
 }

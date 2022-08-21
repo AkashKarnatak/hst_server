@@ -1,10 +1,17 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type User struct {
   Id string `json:"id,omitempty" bson:"_id"`
   EmailId string `json:"emailId,omitempty" bson:"Email"`
   PhNo string `json:"phNo,omitempty" bson:"Phone"`
   Tokens []string `json:"tokens,omitempty" bson:"tokens"`
+}
+
+type Guest struct {
+  Id primitive.ObjectID `json:"id" bson:"_id"`
+  EmailId string `json:"emailId,omitempty" bson:"Email"`
 }
 
 type Mentor struct {
