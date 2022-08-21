@@ -116,10 +116,12 @@ func TestGetMeetings(t *testing.T) {
   client := db.ConnectDB()
   defer db.DisconnectDB(client)
   mappingColl := client.Database("hst").Collection("mappings")
+  startupColl := client.Database("hst").Collection("startups")
+  mentorColl := client.Database("hst").Collection("mentors")
   mc := controllers.NewMeetingController(mappingColl)
   // setup router
   router := httprouter.New()
-  router.POST("/meeting", middlewares.Authorize(mc.GetMeetings))
+  router.POST("/meeting", middlewares.Authorize(mc.GetMeetings, startupColl, mentorColl))
   // create new request
   req, err := http.NewRequest("POST", "/meeting", nil)
   req.Header.Set("Authorization", tokenString)
@@ -142,7 +144,7 @@ func TestLogout(t *testing.T) {
   uc := controllers.NewUserController(startupColl, mentorColl)
   // setup router
   router := httprouter.New()
-  router.POST("/logout", middlewares.Authorize(uc.Logout))
+  router.POST("/logout", middlewares.Authorize(uc.Logout, startupColl, mentorColl))
   // create new request
   req, err := http.NewRequest("POST", "/logout", nil)
   req.Header.Set("Authorization", tokenString)
@@ -167,7 +169,7 @@ func TestLogoutAll(t *testing.T) {
   uc := controllers.NewUserController(startupColl, mentorColl)
   // setup router
   router := httprouter.New()
-  router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll))
+  router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll, startupColl, mentorColl))
   // create new request
   req, err := http.NewRequest("POST", "/logoutAll", nil)
   req.Header.Set("Authorization", tokenString)

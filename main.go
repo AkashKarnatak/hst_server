@@ -29,9 +29,11 @@ func main() {
   router.GET("/startup", uc.GetStartups)
   router.GET("/event", ec.GetEvents)
   router.POST("/login", uc.Login)
-  router.POST("/logout", middlewares.Authorize(uc.Logout))
-  router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll))
-  router.POST("/meeting", middlewares.Authorize(mc.GetMeetings))
+  // TODO: find a better way to pass collection to authorization middleware
+  router.POST("/logout", middlewares.Authorize(uc.Logout, startupColl, mentorColl))
+  router.POST("/logoutAll", middlewares.Authorize(uc.LogoutAll, startupColl, mentorColl))
+  router.POST("/check", middlewares.Authorize(uc.Check, startupColl, mentorColl))
+  router.POST("/meeting", middlewares.Authorize(mc.GetMeetings, startupColl, mentorColl))
 
   fmt.Printf("Listening on %v\n", addr)
   http.ListenAndServe(addr, router)

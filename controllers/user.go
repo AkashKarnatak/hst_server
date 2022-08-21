@@ -149,6 +149,12 @@ func (uc *UserController) Login(w http.ResponseWriter,
   fmt.Fprintf(w, "%s\n", js)
 }
 
+func (uc *UserController) Check(w http.ResponseWriter,
+  r *http.Request, p httprouter.Params) {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintln(w, "Authorized")
+}
+
 func (uc *UserController) Logout(w http.ResponseWriter,
   r *http.Request, p httprouter.Params) {
   // identify whether user is mentor or startup
