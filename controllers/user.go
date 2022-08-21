@@ -29,7 +29,13 @@ func NewUserController(startupColl *mongo.Collection,
 func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  cursor, err := uc.mentorColl.Find(ctx, bson.M{})
+  opts := options.Find().SetProjection(bson.M{
+    "_id": 0,
+    "Email": 0,
+    "Phone": 0,
+    "tokens": 0,
+  })
+  cursor, err := uc.mentorColl.Find(ctx, bson.M{}, opts)
   if err != nil {
     log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
