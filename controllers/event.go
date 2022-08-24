@@ -12,6 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type EventController struct {
@@ -25,7 +26,8 @@ func NewEventController(coll *mongo.Collection) *EventController {
 func (mc *EventController) GetEvents(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
-  cursor, err := mc.coll.Find(ctx, bson.M{})
+  opts := options.Find().SetSort(bson.M{"index": 1})
+  cursor, err := mc.coll.Find(ctx, bson.M{}, opts)
   if err != nil {
     log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)
