@@ -37,7 +37,7 @@ func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ h
     "Email": 0,
     "Phone": 0,
     "tokens": 0,
-  })
+  }).SetSort(bson.M{"Name": 1})
   cursor, err := uc.mentorColl.Find(ctx, bson.M{}, opts)
   if err != nil {
     log.Printf("Error in retrieving data: %v\n", err)
@@ -65,7 +65,7 @@ func (uc *UserController) GetMentors(w http.ResponseWriter, r *http.Request, _ h
   fmt.Fprintf(w, "%s\n", resJson)
 }
 
-func (uc *UserController) GetStartups(w http.ResponseWriter,
+func (uc *UserController) GetIncubatedStartups(w http.ResponseWriter,
   r *http.Request, _ httprouter.Params) {
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
@@ -74,8 +74,45 @@ func (uc *UserController) GetStartups(w http.ResponseWriter,
     "Email": 0,
     "Phone": 0,
     "tokens": 0,
-  })
-  cursor, err := uc.startupColl.Find(ctx, bson.M{}, opts)
+  }).SetSort(bson.M{"Name": 1})
+  cursor, err := uc.startupColl.Find(ctx, bson.M{"hstStartup": false}, opts)
+  if err != nil {
+    log.Printf("Error in retrieving data: %v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  var res []models.Startup
+  err = cursor.All(ctx, &res)
+  if err != nil {
+    log.Printf("Unable to parse collection data: %v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  resJson, err := json.Marshal(res)
+  if err != nil {
+    log.Printf("Unable to marshal data to json: %v\n", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintln(w, "Internal server error")
+    return
+  }
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, "%s\n", resJson)
+}
+
+func (uc *UserController) GetHstStartups(w http.ResponseWriter,
+  r *http.Request, _ httprouter.Params) {
+  ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+  defer cancel()
+  opts := options.Find().SetProjection(bson.M{
+    "_id": 0,
+    "Email": 0,
+    "Phone": 0,
+    "tokens": 0,
+  }).SetSort(bson.M{"Name": 1})
+  cursor, err := uc.startupColl.Find(ctx, bson.M{"hstStartup": true}, opts)
   if err != nil {
     log.Printf("Error in retrieving data: %v\n", err)
     w.WriteHeader(http.StatusInternalServerError)

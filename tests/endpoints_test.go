@@ -38,7 +38,7 @@ func TestGetMentors(t *testing.T) {
   }
 }
 
-func TestGetStartups(t *testing.T) {
+func TestGetIncubatedStartups(t *testing.T) {
   // connect to database
   client := db.ConnectDB()
   defer db.DisconnectDB(client)
@@ -48,8 +48,30 @@ func TestGetStartups(t *testing.T) {
   uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   // setup router
   router := httprouter.New()
-  router.GET("/startup", uc.GetStartups)
-  req, err := http.NewRequest("GET", "/startup", nil)
+  router.GET("/incubatedStartup", uc.GetIncubatedStartups)
+  req, err := http.NewRequest("GET", "/incubatedStartup", nil)
+  if err != nil {
+    log.Fatalln(err)
+  }
+  rr := httptest.NewRecorder()
+  router.ServeHTTP(rr, req)
+  if status := rr.Code; status != http.StatusOK {
+    t.Errorf("Wrong status. Required %v, got %v", http.StatusOK, rr.Code)
+  }
+}
+
+func TestGetHstStartups(t *testing.T) {
+  // connect to database
+  client := db.ConnectDB()
+  defer db.DisconnectDB(client)
+  startupColl := client.Database("hst").Collection("startups")
+  mentorColl := client.Database("hst").Collection("mentors")
+  guestColl := client.Database("hst").Collection("guests")
+  uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
+  // setup router
+  router := httprouter.New()
+  router.GET("/hstStartup", uc.GetHstStartups)
+  req, err := http.NewRequest("GET", "/hstStartup", nil)
   if err != nil {
     log.Fatalln(err)
   }

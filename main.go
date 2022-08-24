@@ -27,7 +27,8 @@ func main() {
   // setup router
   router := httprouter.New()
   router.GET("/mentor", uc.GetMentors)
-  router.GET("/startup", uc.GetStartups)
+  router.GET("/incubatedStartup", uc.GetIncubatedStartups)
+  router.GET("/hstStartup", uc.GetHstStartups)
   router.GET("/event", ec.GetEvents)
   router.POST("/login", uc.Login)
   // TODO: find a better way to pass collection to authorization middleware

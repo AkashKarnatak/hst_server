@@ -28,7 +28,7 @@ type Startup struct {
   Name string `json:"startupName" bson:"Name"`
   Founder string `json:"founder" bson:"Founder Name"`
   Description string `json:"description" bson:"Brief about Idea"`
-  LinkedinProfile string `json:"linkedinProfile" bson:"Linkedin Profile"`
+  Website string `json:"website" bson:"Website"`
   Spoc string `json:"spoc" bson:"SPOC"`
   CurrentScheme string `json:"currentScheme" bson:"Current Scheme"`
   Sector string `json:"sector" bson:"Sector"`
