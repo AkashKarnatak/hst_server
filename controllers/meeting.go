@@ -42,6 +42,7 @@ func (mc *MeetingController) GetMeetings(w http.ResponseWriter,
   }{}
   err := mc.themeMappingColl.FindOne(ctx,
     bson.M{"Mentor Id": p.ByName("id")}).Decode(&mentor)
+  // TODO: check for possible errors
   if err != nil {
     log.Printf("Unable to find mentor: %v\n", err)
   }
