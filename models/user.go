@@ -17,7 +17,7 @@ type Guest struct {
 type Mentor struct {
   User `json:",inline" bson:",inline"`
   Name string `json:"name" bson:"Name"`
-  Description string `json:"description" bson:"Description"`
+  Description string `json:"description" bson:"Brief"`
   LinkedinProfile string `json:"linkedinProfile" bson:"LinkedIn"`
   Organization string `json:"organization" bson:"Organization"`
   Photo string `json:"photo" bson:"Photo"`
