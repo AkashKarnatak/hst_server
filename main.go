@@ -19,11 +19,12 @@ func main() {
   mentorColl := client.Database("hst").Collection("mentors")
   startupColl := client.Database("hst").Collection("startups")
   eventColl := client.Database("hst").Collection("events")
+  themeMappingColl := client.Database("hst").Collection("themeMappings")
   mappingColl := client.Database("hst").Collection("mappings")
   guestColl := client.Database("hst").Collection("guests")
   uc := controllers.NewUserController(startupColl, mentorColl, guestColl)
   ec := controllers.NewEventController(eventColl)
-  mc := controllers.NewMeetingController(mappingColl)
+  mc := controllers.NewMeetingController(mappingColl, themeMappingColl)
   // setup router
   router := httprouter.New()
   router.GET("/mentor", uc.GetMentors)

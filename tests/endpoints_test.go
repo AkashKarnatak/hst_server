@@ -140,10 +140,11 @@ func TestGetMeetings(t *testing.T) {
   // connect to database
   client := db.ConnectDB()
   defer db.DisconnectDB(client)
+  themeMappingColl := client.Database("hst").Collection("themeMappings")
   mappingColl := client.Database("hst").Collection("mappings")
   startupColl := client.Database("hst").Collection("startups")
   mentorColl := client.Database("hst").Collection("mentors")
-  mc := controllers.NewMeetingController(mappingColl)
+  mc := controllers.NewMeetingController(mappingColl, themeMappingColl)
   // setup router
   router := httprouter.New()
   router.POST("/meeting", middlewares.Authorize(mc.GetMeetings, startupColl, mentorColl))

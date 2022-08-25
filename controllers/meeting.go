@@ -14,10 +14,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MeetingController struct { mappingColl *mongo.Collection }
+type MeetingController struct {
+  mappingColl *mongo.Collection
+  themeMappingColl *mongo.Collection
+}
 
-func NewMeetingController(mappingColl *mongo.Collection) *MeetingController {
-  return &MeetingController{mappingColl}
+func NewMeetingController(mappingColl *mongo.Collection,
+  themeMappingColl *mongo.Collection) *MeetingController {
+  return &MeetingController{mappingColl, themeMappingColl}
 }
 
 func (mc *MeetingController) GetMeetings(w http.ResponseWriter,
@@ -32,13 +36,29 @@ func (mc *MeetingController) GetMeetings(w http.ResponseWriter,
   ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
   defer cancel()
   var meetings []models.Meeting
+  mentor := struct {
+    Theme string `bson:"Theme"`
+    MentorId string `bson:"Mentor Id"`
+  }{}
+  err := mc.themeMappingColl.FindOne(ctx,
+    bson.M{"Mentor Id": p.ByName("id")}).Decode(&mentor)
+  if err != nil {
+    log.Printf("Unable to find mentor: %v\n", err)
+  }
   // query to fetch all meetings for user
   cursor, err := mc.mappingColl.Aggregate(
     ctx,
     bson.A{
       bson.M{
         "$match": bson.M{
-          user + " Id": p.ByName("id"),
+          "$or": bson.A{
+            bson.M{
+              user + " Id": p.ByName("id"),
+            },
+            bson.M{
+              "Theme" : mentor.Theme,
+            },
+          },
         },
       },
       bson.M{
@@ -80,6 +100,12 @@ func (mc *MeetingController) GetMeetings(w http.ResponseWriter,
           "Venue": 1,
           "Type": 1,
           "Panel": 1,
+          "index": 1,
+        },
+      },
+      bson.M{
+        "$sort": bson.M{
+          "index": 1,
         },
       },
     },
