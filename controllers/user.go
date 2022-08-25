@@ -152,7 +152,7 @@ func (uc *UserController) Login(w http.ResponseWriter,
   ).Decode(&user)
   if err != nil {
     user = models.User{}
-    coll := uc.mentorColl
+    coll = uc.mentorColl
     err := coll.FindOne(
       ctx,
       bson.M{"Email": r.FormValue("email"), "Phone": r.FormValue("phNo")},
