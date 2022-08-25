@@ -48,4 +48,5 @@ type Startup struct {
   InvestmentValue string `json:"investmentValue" bson:"Investment Value (L)"`
   FundsSanctioned string `json:"fundsSanctioned" bson:"Funds sanctioned"`
   Stage string `json:"stage" bson:"Stage"`
+  Theme string `json:"theme" bson:"Theme"`
 }
