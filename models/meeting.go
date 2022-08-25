@@ -9,4 +9,5 @@ type Meeting struct {
   Day int `json:"day" bson:"Day"`
   Venue string `json:"venue" bson:"Venue"`
   Type string `json:"type" bson:"Type"`
+  Panel string `json:"panel" bson:"Panel"`
 }
